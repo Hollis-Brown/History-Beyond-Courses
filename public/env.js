@@ -1,0 +1,1 @@
+window.ENV = { CLERK_PUBLISHABLE_KEY: "pk_test_51R8qlG2LMhHDFbW3OgrcdIgPI28rmkBLtFzFhDuZeqGrAz1QwJ01HBqVPiJYbcFO1o2eCF2imBoLi8EeAiyzvDzy00ezQLmbn7" };
