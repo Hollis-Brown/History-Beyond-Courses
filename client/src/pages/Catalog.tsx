@@ -1,8 +1,9 @@
 import CourseCard from "@/components/CourseCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/context/CartContext";
 
 export default function Catalog() {
-  const { courses } = useCart();
+  const { courses, isLoading } = useCart();
   
   return (
     <div className="flex-grow">
@@ -17,17 +18,34 @@ export default function Catalog() {
       {/* Course Catalog */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.length > 0 ? (
-              courses.map((course) => (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full">
+                  <Skeleton className="w-full h-48" />
+                  <div className="p-6 flex-grow">
+                    <Skeleton className="h-7 w-4/5 mb-4" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-5/6 mb-2" />
+                    <Skeleton className="h-4 w-4/6 mb-4" />
+                    <div className="flex space-x-4 mb-6">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <div className="px-6 pb-6 mt-auto">
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {courses.map((course) => (
                 <CourseCard key={course.id} course={course} />
-              ))
-            ) : (
-              <div className="col-span-3 text-center py-12">
-                <p className="text-neutral-medium">Loading courses...</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

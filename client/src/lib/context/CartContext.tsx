@@ -8,6 +8,7 @@ const defaultContextValue = {
   courses: [] as Course[],
   customerInfo: null as CustomerInfo | null,
   paymentInfo: null as PaymentInfo | null,
+  isLoading: false,
   addToCart: (_courseId: number) => {},
   removeFromCart: (_courseId: number) => {},
   clearCart: () => {},
@@ -23,6 +24,7 @@ interface CartContextType {
   courses: Course[];
   customerInfo: CustomerInfo | null;
   paymentInfo: PaymentInfo | null;
+  isLoading: boolean;
   addToCart: (courseId: number) => void;
   removeFromCart: (courseId: number) => void;
   clearCart: () => void;
@@ -42,6 +44,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
 
+  // Initialize with default courses immediately to avoid loading state
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     // Load cart from localStorage
     try {
@@ -53,39 +58,65 @@ export function CartProvider({ children }: { children: ReactNode }) {
       console.error("Failed to load cart from localStorage:", error);
     }
 
-    // Fetch courses
+    // Initialize with sample courses to avoid loading state
+    const initialCourses = [
+      {
+        id: 1,
+        title: "Renaissance: Art, Politics & Society",
+        description: "Explore the cultural rebirth of Europe from the 14th to 17th century. Learn how art, science, politics, and society transformed during this pivotal era.",
+        price: 89.99,
+        imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
+        duration: "12 weeks",
+        instructor: "Dr. Emily Richards",
+      },
+      {
+        id: 2,
+        title: "Ancient Civilizations & Their Legacy",
+        description: "Journey through the great ancient civilizations of Egypt, Mesopotamia, Greece, and Rome. Discover their innovations, cultures, and lasting influence.",
+        price: 79.99,
+        imageUrl: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
+        duration: "10 weeks",
+        instructor: "Prof. James Anderson",
+      },
+      {
+        id: 3,
+        title: "Medieval Europe: Power & Faith",
+        description: "Delve into the complex relationships between religion, monarchy, and society during the Middle Ages. Understand the foundations of modern European identities.",
+        price: 69.99,
+        imageUrl: "https://images.unsplash.com/photo-1568607689150-16e44c3ba638?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
+        duration: "8 weeks",
+        instructor: "Dr. Robert Mills",
+      },
+      {
+        id: 4,
+        title: "World Wars: Global Impact",
+        description: "Analyze the causes, events, and lasting consequences of the two World Wars. Examine how these conflicts reshaped international relations and society.",
+        price: 99.99,
+        imageUrl: "https://images.unsplash.com/photo-1553176878-54037da3ef48?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
+        duration: "14 weeks",
+        instructor: "Prof. Sarah Williams",
+      },
+    ];
+    
+    setCourses(initialCourses);
+    setIsLoading(true);
+
+    // Fetch courses from API
     const fetchCourses = async () => {
       try {
         const response = await fetch("/api/courses");
         if (response.ok) {
           const data = await response.json();
-          setCourses(data);
+          if (data && data.length > 0) {
+            setCourses(data);
+          }
         } else {
           console.error("Failed to fetch courses:", response.statusText);
         }
       } catch (error) {
         console.error("Failed to fetch courses:", error);
-        // If fetching fails, provide some sample courses
-        setCourses([
-          {
-            id: 1,
-            title: "Renaissance: Art, Politics & Society",
-            description: "Explore the cultural rebirth of Europe.",
-            price: 89.99,
-            imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-            duration: "12 weeks",
-            instructor: "Dr. Emily Richards",
-          },
-          {
-            id: 2,
-            title: "Ancient Civilizations & Their Legacy",
-            description: "Journey through the great ancient civilizations.",
-            price: 79.99,
-            imageUrl: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-            duration: "10 weeks",
-            instructor: "Prof. James Anderson",
-          },
-        ]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -157,6 +188,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     courses,
     customerInfo,
     paymentInfo,
+    isLoading,
     addToCart,
     removeFromCart,
     clearCart,
