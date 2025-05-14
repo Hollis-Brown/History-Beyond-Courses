@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Main colors */
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  
+  /* UI Elements */
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  
+  /* Brand Colors */
+  --primary: 207 90% 54%;      /* Blue */
+  --primary-foreground: 210 40% 98%;
+  --secondary: 340 82% 52%;    /* Accent Pink/Red */
+  --secondary-foreground: 210 40% 98%;
+  --accent: 19 97% 57%;       /* Orange */
+  --accent-foreground: 210 40% 98%;
+  
+  /* Neutral Shades */
+  --neutral-light: 210 20% 96%; /* Light Gray for backgrounds */
+  --neutral-medium: 215 16% 47%; /* Medium Gray for secondary text */
+  --neutral-dark: 215 28% 17%;  /* Dark Gray for primary text */
+  
+  /* System Colors */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 215 20.2% 65.1%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 20 14.3% 4.1%;
+  --foreground: 60 9.1% 97.8%;
+  --card: 20 14.3% 4.1%;
+  --card-foreground: 60 9.1% 97.8%;
+  --popover: 20 14.3% 4.1%;
+  --popover-foreground: 60 9.1% 97.8%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 340 82% 52%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 19 97% 57%;
+  --accent-foreground: 210 40% 98%;
+  --muted: 12 6.5% 15.1%;
+  --muted-foreground: 24 5.4% 63.9%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --border: 12 6.5% 15.1%;
+  --input: 12 6.5% 15.1%;
+  --ring: 24 5.7% 82.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
