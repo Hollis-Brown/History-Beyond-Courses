@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import { Webhook } from 'svix';
 import { storage } from "../storage";
 import { buffer } from "micro";
+import { Clerk } from "@clerk/clerk-sdk-node";
+
+// Initialize Clerk SDK
+const clerk = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
 
 // Middleware to check if a user is authenticated
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -12,16 +16,15 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   try {
     const token = req.headers.authorization.split(" ")[1];
     
-    // Here we would typically validate the token with Clerk
-    // For simplicity, we're just checking if the token is present
-    // In a production app, you'd use Clerk's SDK to validate this
-    
     if (!token) {
       return res.status(401).json({ error: "Invalid token" });
     }
     
-    // Typically you'd have user information from token verification
-    // req.user = decodedToken.user;
+    // Verify the JWT with Clerk
+    const { sub } = await clerk.verifyToken(token);
+    
+    // Add the Clerk user ID to the request headers for later use
+    req.headers['x-user-id'] = sub;
     
     next();
   } catch (error) {
