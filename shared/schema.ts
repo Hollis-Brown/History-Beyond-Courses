@@ -1,6 +1,28 @@
-import { pgTable, text, serial, integer, numeric, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, numeric, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
+
+// USERS TABLE
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  clerkId: text("clerk_id").notNull().unique(),
+  email: text("email").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  role: text("role").default("user").notNull(),  // "user" or "admin"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  clerkId: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  profileImageUrl: true,
+  role: true,
+});
 
 // COURSES TABLE
 export const courses = pgTable("courses", {
@@ -26,6 +48,7 @@ export const insertCourseSchema = createInsertSchema(courses).pick({
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   orderNumber: text("order_number").notNull().unique(),
+  userId: integer("user_id"),  // Can be null for guests
   customerFirstName: text("customer_first_name").notNull(),
   customerLastName: text("customer_last_name").notNull(),
   customerEmail: text("customer_email").notNull(),
@@ -38,6 +61,7 @@ export const orders = pgTable("orders", {
 
 export const insertOrderSchema = createInsertSchema(orders).pick({
   orderNumber: true,
+  userId: true,
   customerFirstName: true,
   customerLastName: true,
   customerEmail: true,
@@ -78,7 +102,22 @@ export const insertContactSchema = createInsertSchema(contacts).pick({
   message: true,
 });
 
+// Define relationships
+export const userRelations = relations(users, ({ many }) => ({
+  orders: many(orders),
+}));
+
+export const orderRelations = relations(orders, ({ one }) => ({
+  user: one(users, {
+    fields: [orders.userId],
+    references: [users.id],
+  }),
+}));
+
 // Export types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 
