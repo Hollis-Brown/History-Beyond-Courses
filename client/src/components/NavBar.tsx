@@ -54,19 +54,19 @@ export default function NavBar() {
         {/* Navigation Links - Desktop */}
         <div className="hidden md:flex items-center space-x-6">
           <Link href="/">
-            <div className={`hover:text-primary transition-colors ${location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
+            <div className={`cursor-pointer hover:text-primary transition-colors ${location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
               }`}>
               Home
             </div>
           </Link>
           <Link href="/catalog">
-            <div className={`hover:text-primary transition-colors ${location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
+            <div className={`cursor-pointer hover:text-primary transition-colors ${location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
               }`}>
               Course Catalog
             </div>
           </Link>
           <Link href="/contact">
-            <div className={`hover:text-primary transition-colors ${location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
+            <div className={`cursor-pointer hover:text-primary transition-colors ${location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
               }`}>
               Contact
             </div>

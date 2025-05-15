@@ -14,7 +14,7 @@ export default function Footer() {
           <p className="text-neutral-medium text-center mb-6 flex items-center">
             Made with <Heart className="text-accent h-4 w-4 mx-1 inline" fill="currentColor" /> by HB
           </p>
-          <p className="text-neutral-medium text-xs mt-6">
+          <p className="text-neutral-medium text-xs">
             &copy; {new Date().getFullYear()} History Beyond Headlines. All rights reserved.
           </p>
         </div>

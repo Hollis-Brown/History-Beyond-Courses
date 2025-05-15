@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Course, CartItem, CustomerInfo, PaymentInfo } from "../types";
-import { apiRequest } from "../queryClient";
 
 // Define a default empty context value to avoid undefined errors
 const defaultContextValue = {
@@ -8,7 +7,6 @@ const defaultContextValue = {
   courses: [] as Course[],
   customerInfo: null as CustomerInfo | null,
   paymentInfo: null as PaymentInfo | null,
-  isLoading: false,
   addToCart: (_courseId: number) => {},
   removeFromCart: (_courseId: number) => {},
   clearCart: () => {},
@@ -24,7 +22,6 @@ interface CartContextType {
   courses: Course[];
   customerInfo: CustomerInfo | null;
   paymentInfo: PaymentInfo | null;
-  isLoading: boolean;
   addToCart: (courseId: number) => void;
   removeFromCart: (courseId: number) => void;
   clearCart: () => void;
@@ -40,12 +37,40 @@ const CartContext = createContext<CartContextType>(defaultContextValue);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
 
-  // Initialize with default courses immediately to avoid loading state
-  const [isLoading, setIsLoading] = useState(false);
+  // Static course data
+  const staticCourses: Course[] = [
+    {
+      id: 1,
+      title: "Shadows of the Past: Unpacking US History",
+      description: "This seminar course explores key historical events and themes shaping early America, including Indigenous American contributions, the arrival of the Pilgrims and Puritans fleeing the Church of England, the American Revolution, the lasting impact of the Constitution, the enslavement of West Africans and their influence on American culture and politics, waves of European immigration, the religious fervor of the Great Awakening, as well as the catalysts of the Civil War. Participants will gain insights into the American mindset and worldview from 1620 to 1854 through textbooks, academic articles, and videos.",
+      price: 175.00,
+      imageUrl: "https://i.imgur.com/FtBEdsX.jpeg",
+      duration: "Length: 90 minutes",
+      instructor: "Kyli Brown",
+      startDate: "8 June",
+      endDate: "3 August",
+      dayOfWeek: "Sunday",
+      startTime: "16:00",
+      timeZone: "GMT"
+    },
+    {
+      id: 2,
+      title: "The Obscured Path Shaping the United States from 1900–1950",
+      description: "This seminar course examines critical moments that shaped the United States during the first half of the 20th century, including the Second Industrial Revolution, early feminist movement, Jim Crow Laws, the Prohibition era, and the Great Depression. Students will examine America's experiences in both World Wars and how these events influenced U.S. foreign policy toward the UK and Europe. Course materials include textbooks, academic articles, and videos.",
+      price: 175.00,
+      imageUrl: "https://i.imgur.com/d8bERIs.jpeg",
+      duration: "Length: 90 minutes",
+      instructor: "Kyli Brown",
+      startDate: "10 June",
+      endDate: "5 August",
+      dayOfWeek: "Tuesday",
+      startTime: "7:00",
+      timeZone: "GMT"
+    }
+  ];
 
   useEffect(() => {
     // Load cart from localStorage
@@ -57,70 +82,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error);
     }
-
-    // Initialize with sample courses to avoid loading state
-    const initialCourses = [
-      {
-        id: 1,
-        title: "Renaissance: Art, Politics & Society",
-        description: "Explore the cultural rebirth of Europe from the 14th to 17th century. Learn how art, science, politics, and society transformed during this pivotal era.",
-        price: 89.99,
-        imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-        duration: "12 weeks",
-        instructor: "Dr. Emily Richards",
-      },
-      {
-        id: 2,
-        title: "Ancient Civilizations & Their Legacy",
-        description: "Journey through the great ancient civilizations of Egypt, Mesopotamia, Greece, and Rome. Discover their innovations, cultures, and lasting influence.",
-        price: 79.99,
-        imageUrl: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-        duration: "10 weeks",
-        instructor: "Prof. James Anderson",
-      },
-      {
-        id: 3,
-        title: "Medieval Europe: Power & Faith",
-        description: "Delve into the complex relationships between religion, monarchy, and society during the Middle Ages. Understand the foundations of modern European identities.",
-        price: 69.99,
-        imageUrl: "https://images.unsplash.com/photo-1568607689150-16e44c3ba638?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-        duration: "8 weeks",
-        instructor: "Dr. Robert Mills",
-      },
-      {
-        id: 4,
-        title: "World Wars: Global Impact",
-        description: "Analyze the causes, events, and lasting consequences of the two World Wars. Examine how these conflicts reshaped international relations and society.",
-        price: 99.99,
-        imageUrl: "https://images.unsplash.com/photo-1553176878-54037da3ef48?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-        duration: "14 weeks",
-        instructor: "Prof. Sarah Williams",
-      },
-    ];
-    
-    setCourses(initialCourses);
-    setIsLoading(true);
-
-    // Fetch courses from API
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch("/api/courses");
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            setCourses(data);
-          }
-        } else {
-          console.error("Failed to fetch courses:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCourses();
   }, []);
 
   useEffect(() => {
@@ -152,61 +113,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => {
     setCartItems([]);
-    setCustomerInfo(null);
-    setPaymentInfo(null);
   };
 
   const getCartItemCount = () => {
-    return cartItems.reduce((count, item) => count + item.quantity, 0);
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
   const getCartTotal = () => {
     const subtotal = cartItems.reduce((total, item) => {
-      const course = courses.find((c) => c.id === item.courseId);
+      const course = staticCourses.find((c) => c.id === item.courseId);
       return total + (course?.price || 0) * item.quantity;
     }, 0);
-    const tax = subtotal * 0.06; // 6% tax rate
+    const tax = subtotal * 0.1; // 10% tax
     const total = subtotal + tax;
     return { subtotal, tax, total };
-  };
-
-  const setCustomerInformation = (info: CustomerInfo) => {
-    setCustomerInfo(info);
-  };
-
-  const setPaymentInformation = (info: PaymentInfo) => {
-    setPaymentInfo(info);
   };
 
   const isItemInCart = (courseId: number) => {
     return cartItems.some((item) => item.courseId === courseId);
   };
-  
-  // Create the context value object
-  const contextValue: CartContextType = {
-    cartItems,
-    courses,
-    customerInfo,
-    paymentInfo,
-    isLoading,
-    addToCart,
-    removeFromCart,
-    clearCart,
-    getCartItemCount,
-    getCartTotal,
-    setCustomerInformation,
-    setPaymentInformation,
-    isItemInCart,
-  };
 
   return (
-    <CartContext.Provider value={contextValue}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        courses: staticCourses,
+        customerInfo,
+        paymentInfo,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        getCartItemCount,
+        getCartTotal,
+        setCustomerInformation: setCustomerInfo,
+        setPaymentInformation: setPaymentInfo,
+        isItemInCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
 }
 
-export function useCart() {
-  const context = useContext(CartContext);
-  return context;
-}
+export const useCart = () => useContext(CartContext);

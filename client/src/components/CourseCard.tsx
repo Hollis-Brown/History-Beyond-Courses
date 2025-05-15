@@ -35,7 +35,7 @@ export default function CourseCard({ course }: CourseCardProps) {
             ${course.price.toFixed(2)}
           </span>
         </div>
-        <p className="text-neutral-dark mb-4 line-clamp-3">
+        <p className="text-neutral-dark mb-4">
           {course.description}
         </p>
         <div className="space-y-2 text-sm text-neutral-medium mb-6">

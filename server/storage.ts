@@ -136,10 +136,13 @@ export class DatabaseStorage implements IStorage {
 
   // Initialize sample data if needed
   async initializeSampleData() {
+    console.log("Starting sample data initialization...");
     // Check if courses exist
     const existingCourses = await this.getCourses();
+    console.log("Existing courses:", existingCourses);
     
     if (existingCourses.length === 0) {
+      console.log("No courses found, initializing sample data...");
       // Add sample courses
       const sampleCourses: InsertCourse[] = [
         {
@@ -172,10 +175,17 @@ export class DatabaseStorage implements IStorage {
       
       // Insert all courses
       for (const course of sampleCourses) {
-        await this.createCourse(course);
+        try {
+          const createdCourse = await this.createCourse(course);
+          console.log("Created course:", createdCourse);
+        } catch (error) {
+          console.error("Error creating course:", error);
+        }
       }
       
-      console.log("Sample courses initialized");
+      console.log("Sample courses initialization completed");
+    } else {
+      console.log("Courses already exist, skipping initialization");
     }
   }
 }

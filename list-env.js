@@ -1,3 +1,10 @@
-const fs = require('fs');
-console.log('Files in current directory:', fs.readdirSync('.'));
-console.log('Contents of .env:', fs.readFileSync('.env', 'utf8'));
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+config({ path: join(__dirname, '.env') });
+
+console.log('DATABASE_URL:', process.env.DATABASE_URL);

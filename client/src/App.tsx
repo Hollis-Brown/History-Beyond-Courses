@@ -4,8 +4,10 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider } from "@/lib/providers/ClerkProvider";
+import { CartProvider } from "@/lib/context/CartContext";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Home from "@/pages/Home";
 import Catalog from "@/pages/Catalog";
 import Contact from "@/pages/Contact";
@@ -65,16 +67,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ClerkProvider>
-        <TooltipProvider>
-          <div className="flex flex-col min-h-screen">
-            <NavBar />
-            <main className="flex-grow">
-              <Router />
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </TooltipProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <div className="flex flex-col min-h-screen">
+              <NavBar />
+              <main className="flex-grow">
+                <Router />
+              </main>
+              <Footer />
+            </div>
+            <ScrollToTop />
+            <Toaster />
+          </TooltipProvider>
+        </CartProvider>
       </ClerkProvider>
     </QueryClientProvider>
   );
