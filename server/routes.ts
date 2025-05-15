@@ -11,6 +11,7 @@ import { fromZodError } from "zod-validation-error";
 import { nanoid } from "nanoid";
 import { requireAuth, requireAdmin, handleClerkWebhook } from "./middleware/auth";
 import { sendContactEmail } from "./services/email";
+import { createPaymentIntent, confirmPayment } from "./services/payment";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Courses API
@@ -82,6 +83,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle the complex order structure from the client
       const orderData = req.body;
       
+      // Create payment intent first
+      const { clientSecret } = await createPaymentIntent(orderData.total);
+      
       // Create the order
       const orderNumber = `HBH-${nanoid(8).toUpperCase()}`;
       
@@ -117,13 +121,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Order created successfully",
         orderId: order.id,
         orderNumber: order.orderNumber,
+        clientSecret,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
         const validationError = fromZodError(error);
         return res.status(400).json({ message: validationError.message });
       }
+      console.error("Order creation error:", error);
       res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  // Payment confirmation endpoint
+  app.post("/api/payment/confirm", async (req, res) => {
+    try {
+      const { paymentIntentId } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "Payment intent ID is required" });
+      }
+      
+      const paymentIntent = await confirmPayment(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ 
+          message: "Payment not successful",
+          status: paymentIntent.status 
+        });
+      }
+      
+      res.json({ 
+        message: "Payment confirmed",
+        status: paymentIntent.status 
+      });
+    } catch (error) {
+      console.error("Payment confirmation error:", error);
+      res.status(500).json({ message: "Failed to confirm payment" });
     }
   });
 

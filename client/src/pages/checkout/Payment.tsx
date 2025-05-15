@@ -17,8 +17,7 @@ import CheckoutSteps from "@/components/CheckoutSteps";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
-import { nanoid } from "nanoid";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -27,21 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const paymentSchema = z.object({
   paymentMethod: z.enum(["creditCard", "paypal"]),
-  cardNumber: z.string().min(13, {
-    message: "Card number must be at least 13 digits.",
-  }).optional().or(z.literal('')),
-  expiryDate: z.string().min(5, {
-    message: "Expiry date must be in MM/YY format.",
-  }).optional().or(z.literal('')),
-  cvv: z.string().min(3, {
-    message: "CVV must be at least 3 digits.",
-  }).optional().or(z.literal('')),
-  nameOnCard: z.string().min(2, {
-    message: "Name is required.",
-  }).optional().or(z.literal('')),
   address: z.string().min(5, {
     message: "Address is required.",
   }),
@@ -57,24 +54,21 @@ const paymentSchema = z.object({
   country: z.string().min(2, {
     message: "Country is required.",
   }),
-}).refine((data) => {
-  // If payment method is credit card, validate card details
-  if (data.paymentMethod === 'creditCard') {
-    return !!data.cardNumber && !!data.expiryDate && !!data.cvv && !!data.nameOnCard;
-  }
-  return true;
-}, {
-  message: "Credit card details are required",
-  path: ["paymentMethod"],
 });
 
 type PaymentValues = z.infer<typeof paymentSchema>;
 
-export default function Payment() {
-  const { cartItems, courses, customerInfo, setPaymentInformation, getCartTotal } = useCart();
+interface PaymentFormProps {
+  clientSecret: string;
+}
+
+function PaymentForm({ clientSecret }: PaymentFormProps) {
+  const { cartItems, customerInfo, setPaymentInformation, getCartTotal } = useCart();
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const stripe = useStripe();
+  const elements = useElements();
   
   // Redirect to information if customer info is missing
   if (!customerInfo) {
@@ -92,10 +86,6 @@ export default function Payment() {
     resolver: zodResolver(paymentSchema),
     defaultValues: {
       paymentMethod: "creditCard",
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-      nameOnCard: "",
       address: "",
       city: "",
       zipCode: "",
@@ -107,34 +97,36 @@ export default function Payment() {
   const paymentMethod = form.watch("paymentMethod");
   
   async function onSubmit(data: PaymentValues) {
+    if (!stripe || !elements || !clientSecret) {
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      const { subtotal, tax, total } = getCartTotal();
-      
-      // Create order on server
-      const coursesInCart = courses.filter(course => 
-        cartItems.some(item => item.courseId === course.id)
-      );
-      
-      const order = {
-        id: nanoid(),
-        items: coursesInCart.map(course => course.id),
-        customerInfo,
-        paymentInfo: data,
-        subtotal,
-        tax,
-        total,
-        createdAt: new Date().toISOString(),
-      };
-      
-      await apiRequest("POST", "/api/orders", order);
-      
-      // Save payment info to context
-      setPaymentInformation(data);
-      
-      // Navigate to confirmation
-      navigate("/checkout/confirmation");
+      const { error: submitError } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/checkout/confirmation`,
+        },
+      });
+
+      if (submitError) {
+        toast({
+          title: "Payment failed",
+          description: submitError.message || "There was an error processing your payment. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        // Save payment info to context
+        setPaymentInformation({
+          ...data,
+          cardNumber: "****", // Don't store actual card number
+          expiryDate: "**/**",
+          cvv: "***",
+          nameOnCard: "****",
+        });
+      }
     } catch (error) {
       toast({
         title: "Payment processing failed",
@@ -204,66 +196,7 @@ export default function Payment() {
                     {paymentMethod === "creditCard" && (
                       <div>
                         <h3 className="text-lg font-sans font-medium text-neutral-dark mb-4">Card Details</h3>
-                        
-                        <div className="grid grid-cols-1 gap-6">
-                          <FormField
-                            control={form.control}
-                            name="cardNumber"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Card Number</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="1234 5678 9012 3456" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="expiryDate"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Expiration Date</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="MM/YY" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="cvv"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>CVV</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="123" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          
-                          <FormField
-                            control={form.control}
-                            name="nameOnCard"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Name on Card</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <PaymentElement />
                       </div>
                     )}
                     
@@ -362,7 +295,7 @@ export default function Payment() {
                     <div className="flex justify-end">
                       <Button 
                         type="submit" 
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !stripe || !elements}
                       >
                         {isSubmitting ? "Processing..." : "Complete Purchase"}
                       </Button>
@@ -375,5 +308,71 @@ export default function Payment() {
         </div>
       </section>
     </div>
+  );
+}
+
+interface OrderResponse {
+  message: string;
+  orderId: number;
+  orderNumber: string;
+  clientSecret: string;
+}
+
+export default function Payment() {
+  const { cartItems, customerInfo, getCartTotal } = useCart();
+  const [clientSecret, setClientSecret] = useState<string>();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Create PaymentIntent as soon as the page loads
+    const createPaymentIntent = async () => {
+      try {
+        const { total } = getCartTotal();
+        console.log('Creating payment intent with total:', total);
+        console.log('Cart items:', cartItems);
+        console.log('Customer info:', customerInfo);
+        
+        const response = await apiRequest("POST", "/api/orders", {
+          items: cartItems.map(item => item.courseId),
+          customerInfo,
+          subtotal: getCartTotal().subtotal,
+          tax: getCartTotal().tax,
+          total,
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Payment intent creation failed:', errorData);
+          throw new Error(errorData.message || 'Failed to create payment intent');
+        }
+        
+        const data = await response.json() as OrderResponse;
+        console.log('Payment intent created successfully:', data);
+        setClientSecret(data.clientSecret);
+      } catch (error) {
+        console.error('Payment intent creation error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize payment. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (cartItems.length > 0 && customerInfo) {
+      createPaymentIntent();
+    } else {
+      console.log('Missing required data:', { cartItems, customerInfo });
+    }
+  }, [cartItems, customerInfo, getCartTotal, toast]);
+
+  if (!clientSecret) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret }}>
+      <PaymentForm clientSecret={clientSecret} />
+    </Elements>
   );
 }

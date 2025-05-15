@@ -15,6 +15,7 @@ import { useCart } from "@/lib/context/CartContext";
 import { useLocation } from "wouter";
 import CheckoutSteps from "@/components/CheckoutSteps";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
 
 const customerInfoSchema = z.object({
   firstName: z.string().min(2, {
@@ -37,9 +38,15 @@ export default function Information() {
   const { customerInfo, setCustomerInformation, cartItems } = useCart();
   const [, navigate] = useLocation();
   
+  useEffect(() => {
   // Redirect to cart if cart is empty
   if (cartItems.length === 0) {
     navigate("/checkout/cart");
+    }
+  }, [cartItems, navigate]);
+  
+  // Don't render if cart is empty
+  if (cartItems.length === 0) {
     return null;
   }
   

@@ -143,36 +143,30 @@ export class DatabaseStorage implements IStorage {
       // Add sample courses
       const sampleCourses: InsertCourse[] = [
         {
-          title: "Renaissance: Art, Politics & Society",
-          description: "Explore the cultural rebirth of Europe from the 14th to 17th century. Learn how art, science, politics, and society transformed during this pivotal era.",
-          price: "89.99",
-          imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-          duration: "12 weeks",
-          instructor: "Dr. Emily Richards",
+          title: "Shadows of the Past: Unpacking US History",
+          description: "This seminar course explores key historical events and themes shaping early America, including Indigenous American contributions, the arrival of the Pilgrims and Puritans fleeing the Church of England, the American Revolution, the lasting impact of the Constitution, the enslavement of West Africans and their influence on American culture and politics, waves of European immigration, the religious fervor of the Great Awakening, as well as the catalysts of the Civil War. Participants will gain insights into the American mindset and worldview from 1620 to 1854 through textbooks, academic articles, and videos.",
+          price: "175.00",
+          imageUrl: "https://i.imgur.com/FtBEdsX.jpeg",
+          duration: "Length: 90 minutes",
+          instructor: "Kyli Brown",
+          startDate: "8 June",
+          endDate: "3 August",
+          dayOfWeek: "Sunday",
+          startTime: "16:00",
+          timeZone: "GMT",
         },
         {
-          title: "Ancient Civilizations & Their Legacy",
-          description: "Journey through the great ancient civilizations of Egypt, Mesopotamia, Greece, and Rome. Discover their innovations, cultures, and lasting influence.",
-          price: "79.99",
-          imageUrl: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-          duration: "10 weeks",
-          instructor: "Prof. James Anderson",
-        },
-        {
-          title: "Medieval Europe: Power & Faith",
-          description: "Delve into the complex relationships between religion, monarchy, and society during the Middle Ages. Understand the foundations of modern European identities.",
-          price: "69.99",
-          imageUrl: "https://images.unsplash.com/photo-1568607689150-16e44c3ba638?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-          duration: "8 weeks",
-          instructor: "Dr. Robert Mills",
-        },
-        {
-          title: "World Wars: Global Impact",
-          description: "Analyze the causes, events, and lasting consequences of the two World Wars. Examine how these conflicts reshaped international relations and society.",
-          price: "99.99",
-          imageUrl: "https://images.unsplash.com/photo-1553176878-54037da3ef48?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=500",
-          duration: "14 weeks",
-          instructor: "Prof. Sarah Williams",
+          title: "The Obscured Path Shaping the United States from 1900–1950",
+          description: "This seminar course examines critical moments that shaped the United States during the first half of the 20th century, including the Second Industrial Revolution, early feminist movement, Jim Crow Laws, the Prohibition era, and the Great Depression. Students will examine America's experiences in both World Wars and how these events influenced U.S. foreign policy toward the UK and Europe. Course materials include textbooks, academic articles, and videos.",
+          price: "175.00",
+          imageUrl: "https://i.imgur.com/d8bERIs.jpeg",
+          duration: "Length: 90 minutes",
+          instructor: "Kyli Brown",
+          startDate: "10 June",
+          endDate: "5 August",
+          dayOfWeek: "Tuesday",
+          startTime: "7:00",
+          timeZone: "GMT",
         },
       ];
       
@@ -192,6 +186,17 @@ export const storage = new DatabaseStorage();
 // Initialize sample data
 (async () => {
   try {
+    // Wait a bit for the database to be ready
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Check if we can connect to the database
+    try {
+      await db.select().from(courses).limit(1);
+    } catch (error) {
+      console.log("Tables not ready yet, skipping sample data initialization");
+      return;
+    }
+    
     await storage.initializeSampleData();
   } catch (error) {
     console.error("Error initializing sample data:", error);

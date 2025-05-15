@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import logo from "@/assets/logo.png";
 import { useCart } from "../lib/context/CartContext";
 import { ShoppingCart, UserCircle, LogIn, LogOut, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -42,35 +43,31 @@ export default function NavBar() {
     <nav className={`sticky top-0 w-full z-50 bg-white transition-shadow duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/">
-          <div className="flex items-center">
-            <h1 className="font-sans text-xl font-bold">
-              <span className="text-secondary">History</span>
-              <span className="text-primary">Beyond</span>
-            </h1>
-          </div>
+        <Link href="/" className="flex items-center">
+          <img
+            src="https://i.imgur.com/pwWPfj8.png"
+            alt="HistoryBeyondHeadlines Logo"
+            className="h-20 w-auto object-contain"
+          />
         </Link>
 
         {/* Navigation Links - Desktop */}
         <div className="hidden md:flex items-center space-x-6">
           <Link href="/">
-            <div className={`hover:text-primary transition-colors ${
-              location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
-            }`}>
+            <div className={`hover:text-primary transition-colors ${location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
+              }`}>
               Home
             </div>
           </Link>
           <Link href="/catalog">
-            <div className={`hover:text-primary transition-colors ${
-              location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
-            }`}>
+            <div className={`hover:text-primary transition-colors ${location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
+              }`}>
               Course Catalog
             </div>
           </Link>
           <Link href="/contact">
-            <div className={`hover:text-primary transition-colors ${
-              location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
-            }`}>
+            <div className={`hover:text-primary transition-colors ${location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
+              }`}>
               Contact
             </div>
           </Link>
@@ -95,10 +92,10 @@ export default function NavBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   {user?.imageUrl ? (
-                    <img 
-                      src={user.imageUrl} 
-                      alt="Profile" 
-                      className="h-8 w-8 rounded-full object-cover" 
+                    <img
+                      src={user.imageUrl}
+                      alt="Profile"
+                      className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
                     <UserCircle className="h-6 w-6" />
@@ -125,7 +122,7 @@ export default function NavBar() {
                   </Link>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="cursor-pointer text-destructive"
                   onClick={() => signOut()}
                 >
@@ -155,29 +152,26 @@ export default function NavBar() {
           <SheetContent side="left">
             <div className="flex flex-col space-y-4 mt-8">
               <Link href="/">
-                <div className={`text-lg hover:text-primary transition-colors ${
-                  location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
-                }`}>
+                <div className={`text-lg hover:text-primary transition-colors ${location === "/" ? "text-primary font-semibold" : "text-neutral-dark"
+                  }`}>
                   Home
                 </div>
               </Link>
               <Link href="/catalog">
-                <div className={`text-lg hover:text-primary transition-colors ${
-                  location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
-                }`}>
+                <div className={`text-lg hover:text-primary transition-colors ${location === "/catalog" ? "text-primary font-semibold" : "text-neutral-dark"
+                  }`}>
                   Course Catalog
                 </div>
               </Link>
               <Link href="/contact">
-                <div className={`text-lg hover:text-primary transition-colors ${
-                  location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
-                }`}>
+                <div className={`text-lg hover:text-primary transition-colors ${location === "/contact" ? "text-primary font-semibold" : "text-neutral-dark"
+                  }`}>
                   Contact
                 </div>
               </Link>
-              
+
               <div className="h-px bg-gray-200 my-2"></div>
-              
+
               {isSignedIn ? (
                 <>
                   <Link href="/profile">
@@ -186,7 +180,7 @@ export default function NavBar() {
                       Profile
                     </div>
                   </Link>
-                  
+
                   {user?.publicMetadata?.role === "admin" && (
                     <Link href="/admin">
                       <div className="text-lg flex items-center hover:text-primary transition-colors">
@@ -195,8 +189,8 @@ export default function NavBar() {
                       </div>
                     </Link>
                   )}
-                  
-                  <div 
+
+                  <div
                     className="text-lg flex items-center text-destructive cursor-pointer"
                     onClick={() => signOut()}
                   >

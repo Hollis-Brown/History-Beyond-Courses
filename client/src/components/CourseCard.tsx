@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Course } from "../lib/types";
-import { Clock, User } from "lucide-react";
+import { Clock, User, Calendar, MapPin } from "lucide-react";
 import { useCart } from "../lib/context/CartContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,16 +35,22 @@ export default function CourseCard({ course }: CourseCardProps) {
             ${course.price.toFixed(2)}
           </span>
         </div>
-        <p className="text-neutral-dark mb-4">
+        <p className="text-neutral-dark mb-4 line-clamp-3">
           {course.description}
         </p>
-        <div className="flex items-center text-sm text-neutral-medium mb-6">
-          <span className="mr-4 flex items-center">
-            <Clock className="h-4 w-4 mr-1" /> {course.duration}
-          </span>
-          <span className="flex items-center">
-            <User className="h-4 w-4 mr-1" /> {course.instructor}
-          </span>
+        <div className="space-y-2 text-sm text-neutral-medium mb-6">
+          <div className="flex items-center">
+            <Clock className="h-4 w-4 mr-2" /> {course.duration}
+          </div>
+          <div className="flex items-center">
+            <User className="h-4 w-4 mr-2" /> {course.instructor}
+          </div>
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2" /> {course.dayOfWeek}s, {course.startDate} - {course.endDate}
+          </div>
+          <div className="flex items-center">
+            <MapPin className="h-4 w-4 mr-2" /> {course.startTime} {course.timeZone}
+          </div>
         </div>
       </div>
       <div className="px-6 pb-6 mt-auto">

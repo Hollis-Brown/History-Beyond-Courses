@@ -33,6 +33,11 @@ export const courses = pgTable("courses", {
   imageUrl: text("image_url").notNull(),
   duration: text("duration").notNull(),
   instructor: text("instructor").notNull(),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
+  dayOfWeek: text("day_of_week").notNull(),
+  startTime: text("start_time").notNull(),
+  timeZone: text("time_zone").notNull(),
 });
 
 export const insertCourseSchema = createInsertSchema(courses).pick({
@@ -42,6 +47,11 @@ export const insertCourseSchema = createInsertSchema(courses).pick({
   imageUrl: true,
   duration: true,
   instructor: true,
+  startDate: true,
+  endDate: true,
+  dayOfWeek: true,
+  startTime: true,
+  timeZone: true,
 });
 
 // ORDERS TABLE

@@ -6,6 +6,11 @@ export interface Course {
   imageUrl: string;
   duration: string;
   instructor: string;
+  startDate: string;
+  endDate: string;
+  dayOfWeek: string;
+  startTime: string;
+  timeZone: string;
 }
 
 export interface CartItem {
