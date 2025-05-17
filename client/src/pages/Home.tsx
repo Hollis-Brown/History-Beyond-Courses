@@ -14,12 +14,12 @@ export default function Home() {
             {/* Hero Section */}
             <div className="relative w-full">
                 <div
-                    className="w-full h-[500px] bg-cover bg-center"
+                    className="w-full h-[700px] bg-cover bg-center"
                     style={{ backgroundImage: "url('https://i.imgur.com/ieImTcM.png')" }}
                 >
                     <div className="absolute inset-0 bg-neutral-dark opacity-50"></div>
                     <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center relative z-10 text-center">
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-sans font-bold text-white leading-tight mb-4">
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-sans font-bold text-white leading-tight mb-4">
                             The U.S. Story — Explained for International Minds
                         </h1>
                     </div>

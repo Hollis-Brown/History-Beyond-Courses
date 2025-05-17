@@ -48,7 +48,9 @@ function Router() {
       
       {/* Admin Routes */}
       <Route path="/admin">
-        <AdminDashboard />
+        <AdminRoute>
+          <AdminDashboard />
+        </AdminRoute>
       </Route>
       
       {/* Checkout Routes */}

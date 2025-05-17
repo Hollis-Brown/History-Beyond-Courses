@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
-import { Order } from "@shared/schema";
 import {
   Table,
   TableBody,
@@ -10,21 +9,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { formatDistance, format } from "date-fns";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  customerFirstName: string;
+  customerLastName: string;
+  customerEmail: string;
+  createdAt: string;
+  total: number;
+}
 
 export function OrdersTab() {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: orders, isLoading, error } = useQuery({
     queryKey: ["admin", "orders"],
@@ -35,6 +37,16 @@ export function OrdersTab() {
       }
       return response.json() as Promise<Order[]>;
     },
+  });
+
+  // Filter orders based on search query
+  const filteredOrders = orders?.filter(order => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      order.orderNumber.toLowerCase().includes(searchLower) ||
+      `${order.customerFirstName} ${order.customerLastName}`.toLowerCase().includes(searchLower) ||
+      order.customerEmail.toLowerCase().includes(searchLower)
+    );
   });
 
   if (isLoading) {
@@ -58,91 +70,67 @@ export function OrdersTab() {
   }
 
   return (
-    <>
-      <Card>
-        <CardContent className="p-6">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders && orders.length > 0 ? (
-                  orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        {order.orderNumber}
-                      </TableCell>
-                      <TableCell>
-                        {order.customerFirstName} {order.customerLastName}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(order.createdAt), "MMM d, yyyy")}
-                      </TableCell>
-                      <TableCell>${order.total}</TableCell>
-                      <TableCell>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedOrder(order)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                      No orders found.
+    <Card>
+      <CardContent className="p-6">
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search orders..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order #</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredOrders && filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">
+                      {order.orderNumber}
+                    </TableCell>
+                    <TableCell>
+                      {order.customerFirstName} {order.customerLastName}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(order.createdAt), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell>${order.total}</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Order Details Dialog */}
-      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Order Details - #{selectedOrder?.orderNumber}</DialogTitle>
-            <DialogDescription>
-              {selectedOrder && format(new Date(selectedOrder.createdAt), "MMMM d, yyyy 'at' h:mm a")}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedOrder && (
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-semibold mb-1">Customer Information</h3>
-                  <p className="text-sm">
-                    {selectedOrder.customerFirstName} {selectedOrder.customerLastName}
-                  </p>
-                  <p className="text-sm">{selectedOrder.customerEmail}</p>
-                  <p className="text-sm">{selectedOrder.customerPhone}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold mb-1">Order Summary</h3>
-                  <p className="text-sm">Subtotal: ${selectedOrder.subtotal}</p>
-                  <p className="text-sm">Tax: ${selectedOrder.tax}</p>
-                  <p className="text-sm font-semibold">Total: ${selectedOrder.total}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                    {searchQuery ? "No orders found matching your search." : "No orders found."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

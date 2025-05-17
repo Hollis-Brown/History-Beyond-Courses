@@ -23,6 +23,6 @@ export function useAuth() {
     isSignedIn,
     isLoaded,
     isLoading: !isLoaded || isUserDataLoading,
-    isAdmin: userData?.role === "admin",
+    isAdmin: clerkUser?.publicMetadata?.role === "admin",
   };
 }
